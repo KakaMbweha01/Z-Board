@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'notices',
     'rest_framework_simplejwt',
     'accounts',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -140,4 +141,4 @@ REST_FRAMEWORK ={
     ],
 }
 
-#AUTH_USER_MODEL = 'accounts.CustomerUser'
+AUTH_USER_MODEL = 'accounts.CustomUser'
