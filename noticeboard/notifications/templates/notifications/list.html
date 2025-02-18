@@ -8,6 +8,11 @@
     </head>
     <body class="container mt-4">
         <h2 class="mb-3">Notifications</h2>
+        <!-- search bar form-->
+        <form method="GET" class="mb-3">
+            <input type="text" name="q" class="form-control" placeholder="Search notifications..." value="{{ query }}">
+            <button type="submit" class="btn btn-primary mt-2">Search</button>
+        </form>
         <!-- Notification Form-->
         <div class="mb-3">
             {% if user.is_authenticated %}
