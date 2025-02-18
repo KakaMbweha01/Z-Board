@@ -11,6 +11,14 @@
         <!-- search bar form-->
         <form method="GET" class="mb-3">
             <input type="text" name="q" class="form-control" placeholder="Search notifications..." value="{{ query }}">
+            <!-- filter by category-->
+            <select name="category" class="form-control mt-2">
+                <option value="">All Categories</option>
+                <option value="general" {% if category_filter == 'general' %}selected{% endif %}>General</option>
+                <option value="exams" {% if category_filter == 'exams' %}selected{% endif %}>Exams</option>
+                <option value="events" {% if category_filter == 'events' %}selected{% endif %}>Events</option>
+                <option value="deadlines" {% if category_filter == 'deadlines' %}selected{% endif %}>Deadlines</option>
+            </select>
             <button type="submit" class="btn btn-primary mt-2">Search</button>
         </form>
         <!-- Notification Form-->
@@ -27,6 +35,13 @@
                         <div class="mb-2">
                             <textarea name="message" class="form-control" placeholder="Message" required></textarea>
                         </div>
+                        <div class="mb-2">
+                            <select name="category" class="form-control" required>
+                                <option value="general">General</option>
+                                <option value="exams">Exams</option>
+                                <option value="events">Events</option>
+                                <option value="deadlines">Deadlines</option>
+                            </select>
                         <button type="submit" class="btn btn-primary">Post Notfication</button>
                     </form>
                 {% else %}

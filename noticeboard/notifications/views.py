@@ -13,15 +13,22 @@ from django.db.models import Q
 @login_required
 def notification_list(request):
     query = request.GET.get('q', '')
+    category_filter = request.GET.get('category', '')
+    
     notifications = Notification.objects.all().order_by('-created_at')
 
     if query:
         notifications = notifications.filter(Q(title_icontains=query) | Q(message_icontains=query))
 
+    if category_filter:
+        notifications = notifications.filter(category=category_filter)
+
     if request.method =='POST':
         if request.user.is_staff: # only staff can post
             title = request.POST.get('title')
             message = request.POST.get('message')
+            category = request.POST.get('category', 'general')
+
             if title and message:
                 Notification.objects.create(title=title, message=message)
                 # get students emails except staff
@@ -36,7 +43,11 @@ def notification_list(request):
                 )
                 return redirect('notification_list')
 
-    return render(request, 'notifications/list.html', {'notifications': notifications, 'query': query})
+    return render(request, 'notifications/list.html', {
+        'notifications': notifications,
+        'query': query,
+        'category_filter': category_filter,
+        })
 
 # signup view for students
 def signup(request):
