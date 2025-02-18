@@ -6,6 +6,7 @@ from django.contrib.auth import login
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -14,7 +15,7 @@ from django.db.models import Q
 def notification_list(request):
     query = request.GET.get('q', '')
     category_filter = request.GET.get('category', '')
-    
+
     notifications = Notification.objects.all().order_by('-created_at')
 
     if query:
@@ -23,6 +24,10 @@ def notification_list(request):
     if category_filter:
         notifications = notifications.filter(category=category_filter)
 
+    paginator = Paginator(notifications, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     if request.method =='POST':
         if request.user.is_staff: # only staff can post
             title = request.POST.get('title')
