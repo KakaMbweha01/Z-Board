@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Notifications</h2>
+    <ul>
+        {% for notification in notifications %}
+            <li>{{ notification.title }} - {{ notification.created_at }}</li>
+        {% empty %}
+            <p>No notifications yet.</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

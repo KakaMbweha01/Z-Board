@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Notifications</h2>
+    <a href="{% url 'add_notification' %}" class="btn btn-success">Add Notification</a>
+    <!-- Notification Form -->
+    <div class="mb-3">
+        {% if user.is_authenticated %}
+            <p><strong>Welcome, {{ user.username }}!</strong></p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'register' %}" class="btn btn-info">Sign Up</a>
+            {% endif %}
+
+            {% if user.is_staff %}
+                <!-- Only show the form if user is an admin/teacher -->
+                <form method="POST" class="mb-3">
+                    {% csrf_token %}
+                    <div class="mb-2">
+                        <input type="text" name="title" class="form-control" placeholder="Title" required>
+                    </div>
+                    <div class="mb-2">
+                        <textarea name="message" class="form-control" placeholder="Message" required></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <select name="category" class="form-control" required>
+                            <option value="general">General</option>
+                            <option value="exams">Exams</option>
+                            <option value="events">Events</option>
+                            <option value="deadlines">Deadlines</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Notification</button>
+                </form>
+            {% else %}
+                <p class="text-info">You are logged in as a student. You can view notifications but cannot post.</p>
+            {% endif %}
+            <form method="GET" class="mb-3">
+                <input type="text" name="q" class="form-control" placeholder="Search notifications..." value="{{ query }}">
+                <select name="category" class="form-control mt-2">
+                    <option value="">All Categories</option>
+                    <option value="general" {% if category_filter == 'general' %}selected{% endif %}>General</option>
+                    <option value="exams" {% if category_filter == 'exams' %}selected{% endif %}>Exams</option>
+                    <option value="events" {% if category_filter == 'events' %}selected{% endif %}>Events</option>
+                    <option value="deadlines" {% if category_filter == 'deadlines' %}selected{% endif %}>Deadlines</option>
+                </select>
+                <button type="submit" class="btn btn-primary mt-2">Search</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-success">Login</a>
+        {% endif %}
+    </div>
+    <!-- Notification List -->
+    <div class="list-group">
+        {% for notification in notifications %}
+            <div class="list-group-item">
+                <h5 class="mb-1">{{ notification.title }}</h5>
+                <p class="mb-1">{{ notification.message }}</p>
+                <small class="text-muted">{{ notification.created_at }}</small>
+                {% if user.is_authenticated and user.role == "admin" %}
+                    <a href="{% url 'edit_notification' notification.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'delete_notification' notification.id %}" class="btn btn-danger btn-sm">Delete</a>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No notifications available.</p>
+        {% endfor %}
+        <!-- Pagination Controls -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if notifications.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notifications.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">Previous</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
+                </li>
+
+                {% if notifications.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ notifications.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
