@@ -6,7 +6,8 @@
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Update</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
     </form>
+    <a href="{% url 'admin_notifications' %}">Back</a>
 </div>
 {% endblock %}

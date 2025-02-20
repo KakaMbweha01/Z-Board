@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-3">Notifications</h2>
+<div class="container">
+    <h2 class="mb-4">Notifications</h2>
     <a href="{% url 'add_notification' %}" class="btn btn-success">Add Notification</a>
     <!-- Notification Form -->
     <div class="mb-3">
@@ -14,7 +14,7 @@
 
             {% if user.is_staff %}
                 <!-- Only show the form if user is an admin/teacher -->
-                <form method="POST" class="mb-3">
+                <!--<form method="POST" class="mb-3">
                     {% csrf_token %}
                     <div class="mb-2">
                         <input type="text" name="title" class="form-control" placeholder="Title" required>
@@ -30,8 +30,14 @@
                             <option value="deadlines">Deadlines</option>
                         </select>
                     </div>
+                    <div class="mb-2">
+                        <select name="category" class="form-control" required>
+                            <option value="admin">Admin</option>
+                            <option value="student">Student</option>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary">Post Notification</button>
-                </form>
+                </form>-->
             {% else %}
                 <p class="text-info">You are logged in as a student. You can view notifications but cannot post.</p>
             {% endif %}
@@ -51,15 +57,24 @@
         {% endif %}
     </div>
     <!-- Notification List -->
-    <div class="list-group">
+    {% load custom-filter %} {# Load custom filters #}
+    <div class="card mb-3 {% if notification|is_read:user %}bg-light{% endif %}">
         {% for notification in notifications %}
-            <div class="list-group-item">
-                <h5 class="mb-1">{{ notification.title }}</h5>
-                <p class="mb-1">{{ notification.message }}</p>
-                <small class="text-muted">{{ notification.created_at }}</small>
-                {% if user.is_authenticated and user.role == "admin" %}
-                    <a href="{% url 'edit_notification' notification.id %}" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="{% url 'delete_notification' notification.id %}" class="btn btn-danger btn-sm">Delete</a>
+            <div class="card-body">
+                {% if notification %}
+                    <h5 class="card-title">{{ notification.title }}</h5>
+                    {% if notification|is_read:user %}
+                        <p class="text-muted">{{ notification.message }} (Read)</p>
+                    {% else %}
+                        <p><strong>{{ notification.message }}</strong> (Unread)</p>
+                    {% endif %}
+                    <small class="text-muted">Posted on: {{ notification.created_at }}</small>
+                    {% if user.is_authenticated and user.role == "admin" %}
+                        <a href="{% url 'edit_notification' notification.id %}" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="{% url 'delete_notification' notification.id %}" class="btn btn-danger btn-sm">Delete</a>
+                    {% else %}
+                        <a href="{% url 'mark_as_read' notification.id %}" class="btn btn-success btn-sm">Mark as Read</a>
+                    {% endif %}
                 {% endif %}
             </div>
         {% empty %}

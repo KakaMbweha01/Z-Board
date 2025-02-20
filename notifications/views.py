@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Notification
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from .forms import NotificationForm
+from django.http import HttpResponse
 
 # Create your views here.
 
@@ -19,16 +20,6 @@ def notification_list(request):
     category_filter = request.GET.get('category', '')
 
     notifications = Notification.objects.all().order_by('-created_at')
-
-    if query:
-        notifications = notifications.filter(Q(title_icontains=query) | Q(message_icontains=query))
-
-    if category_filter:
-        notifications = notifications.filter(category=category_filter)
-
-    paginator = Paginator(notifications, 5)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
 
     if request.method =='POST':
         if request.user.is_staff: # only staff can post
@@ -49,6 +40,20 @@ def notification_list(request):
                     fail_silently=False,
                 )
                 return redirect('notification_list')
+    if query:
+        notifications = notifications.filter(Q(title_icontains=query) | Q(message_icontains=query))
+
+    if category_filter:
+        notifications = notifications.filter(category=category_filter)
+
+    for notification in notifications:
+        notification.is_read = notification.is_read_by(request.user)
+
+    paginator = Paginator(notifications, 5)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+
 
     return render(request, 'notifications/list.html', {
         'notifications': page_obj,
@@ -80,7 +85,7 @@ def signup(request):
 def user_login(request):
     #if request.user.is_authenticated:
         #return redirect('notification_list')
-    print("RENDERING LOGIN PAGE ....")
+    #print("RENDERING LOGIN PAGE ....") debugging code!
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
@@ -115,6 +120,13 @@ def register(request):
 def is_admin(user):
     return user.is_authenticated and user.role == 'admin'
 
+# list all notifications (Admin Only)
+@login_required
+@user_passes_test(is_admin)
+def notification_list_admin(request):
+    notifications = Notification.objects.all()
+    return render(request, "notifications/admin_notification_list.html", {"notifications": notifications})
+
 # adding a notification
 @login_required
 @user_passes_test(is_admin)
@@ -122,8 +134,16 @@ def add_notification(request):
     if request.method == "POST":
         form = NotificationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('notificaion_list')
+            notification = form.save(commit=False)
+            #notification.user = request.user  # Assign the logged-in user before saving
+            # ensure a user is selected from the form
+            if form.cleaned_data.get('user'):
+                notification.user = form.cleaned_data['user']
+            else:
+                return HttpResponse("Error: A recipient must be selected.")
+            notification.save()
+            #form.save()
+            return redirect('admin_notifications')
     else:
         form = NotificationForm()
 
@@ -132,14 +152,14 @@ def add_notification(request):
 # edit a notification
 @login_required
 @user_passes_test(is_admin)
-def edit_notification(request, pk):
-    notification = Notification.objects.get(pk=pk)
+def edit_notification(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
 
     if request.method == "POST":
         form = NotificationForm(request.POST, instance=notification)
         if form.is_valid():
             form.save()
-            return redirect('notificaion_list')
+            return redirect('admin_notifications')
     else:
         form = NotificationForm(instance=notification)
 
@@ -148,11 +168,21 @@ def edit_notification(request, pk):
 # delete a notification
 @login_required
 @user_passes_test(is_admin)
-def delete_notification(request, pk):
-    notification = Notification.objects.get(pk=pk)
+def delete_notification(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id)
 
     if request.method == "POST":
         notification.delete()
-        return redirect('notification_list')
+        return redirect('admin_notifications')
 
     return render(request, 'notifications/delete_notification.html', {'notification': notification })
+
+@login_required
+def mark_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, notification_id)
+    notification.read_by.add(request.user)
+    return redirect('notification_list')
+
+def home(request):
+    notifications = Notification.objects.all().order_by('-created_at')[:5]
+    return render(request, 'notifications/home.html', {'notifications': notifications })

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">📢 Welcome to the Student Noticeboard</h2>
+    <p class="text-center text-muted">Stay updated with the latest announcements and notifications.</p>
+
+    <h3 class="mt-4">Recent Notifications</h3>
+    <ul class="list-group">
+        {% for notification in notifications %}
+            <li class="list-group-item">
+                <strong>{{ notification.title }}</strong> - {{ notification.content }}
+                <span class="text-muted float-end">{{ notification.created_at|date:"M d, Y" }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-muted">No notifications available.</li>
+        {% endfor %}
+    </ul>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'notification_list' %}" class="btn btn-primary">View All Notifications</a>
+    </div>
+</div>
+{% endblock %}

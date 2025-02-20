@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 # Register your models here.
 
 # notif model
-admin.site.register(Notification)
+#admin.site.register(Notification)
 
 # Register custom user in django admin
 class CustomUserAdmin(UserAdmin):
@@ -27,5 +27,19 @@ class CustomUserAdmin(UserAdmin):
 
     search_fields = ('username', 'email')
     ordering = ('username',)
+
+# admin notifications
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'user', 'created_at', 'is_read_status']
+    search_fields = ['title', 'user__username']
+    list_filter = ['created_at']
+    ordering = ['-created_at']
+
+    def is_read_status(self, obj):
+        return obj.is_read
+    is_read_status.boolean = True
+    is_read_status.short_description = "Read Status"
+
+admin.site.register(Notification, NotificationAdmin)
 
 admin.site.register(CustomUser, CustomUserAdmin)

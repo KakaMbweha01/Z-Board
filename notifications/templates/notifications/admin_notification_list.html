@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin - Manage Notifications</h2>
+<a href="{% url 'add_notification' %}" class="btn btn-success">Create New Notification</a>
+<table class="table">
+    <tr>
+        <th>Title</th>
+        <th>Message</th>
+        <th>Recipient</th>
+        <th>Actions</th>
+    </tr>
+    {% for notification in notifications %}
+    <tr>
+        <td>{{ notification.title }}</td>
+        <td>{{ notification.message }}</td>
+        <td>{{ notification.user.username }}</td>
+        <td>{{ notification.category }}</td>
+        <td>
+            <a href="{% url 'edit_notification' notification.id %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'delete_notification' notification.id %}" class="btn btn-danger">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

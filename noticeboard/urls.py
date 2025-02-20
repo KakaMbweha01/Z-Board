@@ -17,11 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-from notifications.views import signup, notification_list
+from notifications.views import signup, notification_list, home
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', notification_list, name='home'),
+    path('', home, name='home'),
     path('notifications/', include('notifications.urls')),
     # auth urls
     path('signup/', include('django.contrib.auth.urls')),
