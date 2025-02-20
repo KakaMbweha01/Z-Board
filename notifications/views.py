@@ -28,26 +28,36 @@ def notification_list(request):
             category = request.POST.get('category', 'general')
 
             if title and message:
-                Notification.objects.create(title=title, message=message)
-                # get students emails except staff
-                student_emails = User.objects.filter(is_staff=False).values_list('email', flat=True)
-                # send emails to students
-                send_mail(
-                    subject=f"New Notification: {title}",
+                Notification.objects.create(
+                    title=title,
                     message=message,
-                    from_email='leonestill804@gmail.com',
-                    recipient_list=student_emails,
-                    fail_silently=False,
-                )
+                    category=category
+                    )
+                # get students emails except staff
+                ##student_emails = User.objects.filter(is_staff=False).values_list('email', flat=True)
+                student_emails = list(User.objects.filter(is_staff=False)
+                                      .exclude(email="")
+                                      .values_list('email', flat=True)
+                                      )
+                # send emails to students
+                if student_emails:
+                    send_mail(
+                        subject=f"New Notification: {title}",
+                        message=message,
+                        from_email='leonestill804@gmail.com',
+                        recipient_list=student_emails,
+                        fail_silently=False,
+                    )
                 return redirect('notification_list')
     if query:
-        notifications = notifications.filter(Q(title_icontains=query) | Q(message_icontains=query))
+        notifications = notifications.filter(Q(title__icontains=query) | Q(message__icontains=query))
 
     if category_filter:
         notifications = notifications.filter(category=category_filter)
 
     for notification in notifications:
-        notification.is_read = notification.is_read_by(request.user)
+        if hasattr(notification, 'is_read_by'):
+            notification.is_read = notification.is_read_by(request.user)
 
     paginator = Paginator(notifications, 5)
     page_number = request.GET.get('page')
@@ -179,7 +189,7 @@ def delete_notification(request, notification_id):
 
 @login_required
 def mark_as_read(request, notification_id):
-    notification = get_object_or_404(Notification, notification_id)
+    notification = get_object_or_404(Notification, id=notification_id)
     notification.read_by.add(request.user)
     return redirect('notification_list')
 

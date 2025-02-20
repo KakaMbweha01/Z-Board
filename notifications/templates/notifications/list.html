@@ -2,8 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <h2 class="mb-4">Notifications</h2>
-    <a href="{% url 'add_notification' %}" class="btn btn-success">Add Notification</a>
+    <h2 class="text-center my-3">Your Notifications</h2>
     <!-- Notification Form -->
     <div class="mb-3">
         {% if user.is_authenticated %}
@@ -13,7 +12,10 @@
             {% endif %}
 
             {% if user.is_staff %}
-                <!-- Only show the form if user is an admin/teacher -->
+                <!-- Only show the form if user is anadmin/teacher -->
+                <div class="mb-2">
+                    <a href="{% url 'add_notification' %}" class="btn btn-success">Add Notification</a>
+                </div>
                 <!--<form method="POST" class="mb-3">
                     {% csrf_token %}
                     <div class="mb-2">
@@ -36,7 +38,6 @@
                             <option value="student">Student</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Post Notification</button>
                 </form>-->
             {% else %}
                 <p class="text-info">You are logged in as a student. You can view notifications but cannot post.</p>
@@ -78,7 +79,7 @@
                 {% endif %}
             </div>
         {% empty %}
-            <p>No notifications available.</p>
+            <p class="text-muted text">No notifications available.</p>
         {% endfor %}
         <!-- Pagination Controls -->
         <nav aria-label="Page navigation">

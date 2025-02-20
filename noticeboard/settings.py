@@ -135,7 +135,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'leonestill804@gmail.com'  # Replace with your email
 EMAIL_HOST_PASSWORD = 'swph rxpm aljb hrzw'  # Use an App Password, not your actual password
-DEFAULT_FROM_EMAIL = 'noreplyadmin@gmail.com'
+#DEFAULT_FROM_EMAIL = 'no-reply@gmail.com'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
